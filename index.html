@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Pembaca CSV dan Excel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #6A0DAD; /* Background dengan warna ungu */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            text-align: center;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 60%;
+        }
+        header {
+            color: #4B0082;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        input[type="file"] {
+            padding: 10px;
+            background-color: #6A0DAD;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        input[type="file"]::file-selector-button {
+            padding: 10px;
+            background-color: #4B0082;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        /* Efek hover untuk input file */
+        input[type="file"]::file-selector-button:hover {
+            background-color: #3a006e;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #4B0082;
+            color: white;
+        }
+        td {
+            background-color: #f9f9f9;
+        }
+        /* Scroll untuk tabel yang besar */
+        #output {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        /* Center tabel */
+        table {
+            margin-left: auto;
+            margin-right: auto;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Pembaca File CSV dan Excel</h1>
+        </header>
+        <p>Upload file CSV atau Excel di bawah ini, dan data akan otomatis ditampilkan.</p>
+        <input type="file" id="fileInput" accept=".csv, .xls, .xlsx" />
+        
+        <h3>Isi File:</h3>
+        <div id="output"></div>
+        
+        <footer>
+            <p>Okan Athallah Maredith</p>
+            <p>164231088</p>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const output = document.getElementById('output');
+
+        // Fungsi untuk memuat dan membaca file yang diunggah
+        fileInput.addEventListener('change', function() {
+            if (fileInput.files.length === 0) {
+                alert("Silahkan pilih file terlebih dahulu.");
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                // Ambil sheet pertama
+                const sheetNames = workbook.SheetNames;
+                const sheet = workbook.Sheets[sheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+                // Tampilkan data dalam tabel
+                let html = '<table>';
+                json.forEach((row, index) => {
+                    html += '<tr>';
+                    row.forEach(cell => {
+                        html += `<td>${cell || ''}</td>`;
+                    });
+                    html += '</tr>';
+                });
+                html += '</table>';
+                output.innerHTML = html;
+
+                // Mengatasi tabel yang tinggi dengan scroll
+                output.scrollTop = 0; // Reset scroll ke atas jika file baru diunggah
+            };
+
+            reader.readAsArrayBuffer(file);
+        });
+    </script>
+</body>
+</html>
